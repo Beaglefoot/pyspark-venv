@@ -1,0 +1,42 @@
+version: '3'
+
+x-spark-volumes: &spark-volumes
+  - ./conf/log4j.properties:/opt/bitnami/spark/conf/log4j.properties
+  - ./main.py:/main.py
+  - ./venv_cm.py:/venv_cm.py
+  - ./myvenv:/myvenv
+
+x-spark-worker-env: &spark-worker-env
+  - SPARK_MODE=worker
+  - SPARK_MASTER_URL=spark://spark:7077
+  - SPARK_WORKER_MEMORY=1G
+  - SPARK_WORKER_CORES=1
+  - SPARK_RPC_AUTHENTICATION_ENABLED=no
+  - SPARK_RPC_ENCRYPTION_ENABLED=no
+  - SPARK_LOCAL_STORAGE_ENCRYPTION_ENABLED=no
+  - SPARK_SSL_ENABLED=no
+
+services:
+  spark:
+    image: bitnami/spark:3
+    hostname: spark
+    environment:
+      - SPARK_MODE=master
+      - SPARK_RPC_AUTHENTICATION_ENABLED=no
+      - SPARK_RPC_ENCRYPTION_ENABLED=no
+      - SPARK_LOCAL_STORAGE_ENCRYPTION_ENABLED=no
+      - SPARK_SSL_ENABLED=no
+    ports:
+      - 8080:8080
+      - 4040:4040
+    volumes: *spark-volumes
+
+  spark-worker-1:
+    image: bitnami/spark:3
+    environment: *spark-worker-env
+    volumes: *spark-volumes
+
+  spark-worker-2:
+    image: bitnami/spark:3
+    environment: *spark-worker-env
+    volumes: *spark-volumes
